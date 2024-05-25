@@ -50,50 +50,42 @@ Remember, the script will continuously run as long as you are on the likes page,
         console.log('Clicked on element.');
     }
 
-    function verifyChange(element, index, total) {
-        setTimeout(() => {
-            if (element.getAttribute('data-testid') === 'like') {
-                console.log('State changed to like.');
-                if (index === total - 1) {
-                    setTimeout(checkCompletion, 3000); // Delay before checking completion
-                }
-            } else {
+    async function verifyAndClick(hearts) {
+        for (const heart of hearts) {
+            clickElement(heart);
+            await new Promise(resolve => setTimeout(resolve, 2000)); // Wait to see if state changes
+            if (heart.getAttribute('data-testid') !== 'like') {
                 console.log('State is still unlike, trying to click again.');
-                clickElement(element);
-                setTimeout(() => verifyChange(element, index, total), 2000); // Reschedule the check if the state has not changed
+                clickElement(heart);
             }
-        }, 2000); // Wait 2 seconds to check if the state has changed
+        }
+        checkCompletion();
     }
 
     function checkCompletion() {
-        let checkHearts = Array.from(document.querySelectorAll('button[data-testid="unlike"]'));
-        console.log('Rechecking hearts after clicks.');
+        let checkHearts = document.querySelectorAll('button[data-testid="unlike"]');
         if (checkHearts.length === 0) {
-            console.log('Nenhum unlike restante, fazendo scroll');
-            window.scrollTo(0, document.body.scrollHeight || document.documentElement.scrollHeight);
+            console.log('No unlikes left, scrolling');
+            scrollToBottom();
         } else {
             console.log('Unlikes still exist, will not scroll');
         }
     }
 
+    function scrollToBottom() {
+        window.scrollTo(0, document.body.scrollHeight || document.documentElement.scrollHeight);
+    }
+
     function processHearts() {
-        let buttons = document.querySelectorAll('button[data-testid="unlike"]');
-        let hearts = Array.from(buttons);
-
+        let hearts = document.querySelectorAll('button[data-testid="unlike"]');
         console.log('Hearts found:', hearts.length);
-
         if (hearts.length > 0) {
-            hearts.forEach((h, index) => {
-                setTimeout(() => {
-                    clickElement(h);
-                    verifyChange(h, index, hearts.length);
-                }, index * 2000); // Delay between each click
-            });
+            verifyAndClick(Array.from(hearts));
         } else {
             console.log('No unlikes found, performing scroll');
-            window.scrollTo(0, document.body.scrollHeight || document.documentElement.scrollHeight);
+            scrollToBottom();
         }
     }
 
-    setInterval(processHearts, 5000 + Math.random() * 1000); // Interval to avoid overly rapid actions
+    setInterval(processHearts, 6000); // Use a fixed interval to avoid overly rapid actions
 })();
