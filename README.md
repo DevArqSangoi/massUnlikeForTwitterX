@@ -19,7 +19,7 @@ To use this script, follow these steps:
 ## Usage
 
 To use this script effectively, simply follow these steps:
-1. Navigate to the likes tab of the profile and wait. The script may take a few seconds to start, but it will start. The URL should follow this pattern: `https://x.com/{your_username}/likes`.
+1. Navigate to your likes tab and wait. The script may take a few seconds to start, but it will start. The URL should follow this pattern: `https://x.com/{your_username}/likes`.
 2. Once you are on the correct page, the script will automatically start to identify and click any "unlike" buttons present on the page.
 3. The script operates in intervals, attempting to click "unlikes", verifying changes, and then scrolling down to load more items if no more "unlikes" are detected.
 4. Monitor the process, if necessary, to ensure that everything is functioning as expected. Console logs will provide real-time feedback on the script’s actions, indicating which elements are being clicked and the status of the script’s operations.
