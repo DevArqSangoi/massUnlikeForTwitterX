@@ -19,7 +19,7 @@ To use this script, follow these steps:
 ## Usage
 
 To use this script effectively, simply follow these steps:
-1. Navigate to the likes tab of the profile and hit F5. The URL should follow this pattern: `https://x.com/{your_username}/likes`.
+1. Navigate to the likes tab of the profile and wait. The script may take a few seconds to start, but it will start. The URL should follow this pattern: `https://x.com/{your_username}/likes`.
 2. Once you are on the correct page, the script will automatically start to identify and click any "unlike" buttons present on the page.
 3. The script operates in intervals, attempting to click "unlikes", verifying changes, and then scrolling down to load more items if no more "unlikes" are detected.
 4. Monitor the process, if necessary, to ensure that everything is functioning as expected. Console logs will provide real-time feedback on the script’s actions, indicating which elements are being clicked and the status of the script’s operations.
@@ -33,12 +33,15 @@ Remember, the script will continuously run as long as you are on the likes page,
 // @version      0.1
 // @description  Automatically clicks on 'unlikes' and scrolls the page
 // @author       You
-// @match        *://x.com/*/likes
+// @match        *://*/*
 // @grant        none
 // ==/UserScript==
 
 (function() {
     'use strict';
+
+    let isProcessing = false; // Flag to prevent multiple invocations
+    let lastInvocationTime = Date.now(); // Track last invocation time for cooldown
 
     function clickElement(element) {
         const clickEvent = new MouseEvent('click', {
@@ -70,6 +73,7 @@ Remember, the script will continuously run as long as you are on the likes page,
         } else {
             console.log('Unlikes still exist, will not scroll');
         }
+        isProcessing = false; // Reset flag after processing
     }
 
     function scrollToBottom() {
@@ -77,15 +81,41 @@ Remember, the script will continuously run as long as you are on the likes page,
     }
 
     function processHearts() {
-        let hearts = document.querySelectorAll('button[data-testid="unlike"]');
-        console.log('Hearts found:', hearts.length);
-        if (hearts.length > 0) {
-            verifyAndClick(Array.from(hearts));
-        } else {
-            console.log('No unlikes found, performing scroll');
-            scrollToBottom();
+        let now = Date.now();
+        if (!isProcessing && (now - lastInvocationTime > 5000)) { // Ensure there's a 5-second cooldown
+            isProcessing = true; // Set flag to true to indicate processing is ongoing
+            lastInvocationTime = now; // Update last invocation time
+            let hearts = document.querySelectorAll('button[data-testid="unlike"]');
+            console.log('Hearts found:', hearts.length);
+            if (hearts.length > 0) {
+                verifyAndClick(Array.from(hearts));
+            } else {
+                console.log('No unlikes found, performing scroll');
+                scrollToBottom();
+                isProcessing = false; // Reset flag if nothing to process
+            }
         }
     }
 
-    setInterval(processHearts, 6000); // Use a fixed interval to avoid overly rapid actions
+    // Observe DOM changes for new unlikes being added dynamically
+    function observeDOM() {
+        const observer = new MutationObserver((mutations) => {
+            // Check if the current URL matches the intended pattern
+            if (/^https?:\/\/x\.com\/[^/]*\/likes/.test(window.location.href)) {
+                mutations.forEach((mutation) => {
+                    if (mutation.addedNodes.length) {
+                        processHearts();
+                    }
+                });
+            }
+        });
+
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    }
+
+    // Initialize the observer and start processing
+    observeDOM();
 })();
