@@ -1,6 +1,6 @@
 # Auto Unlike and Scroll
 
-This Tampermonkey script is designed to automate the process of clicking "unlike" buttons on TwitterX and subsequently scrolling down the page.
+This Tampermonkey script is designed to automate the process of clicking "unlike" buttons on Twitter X and subsequently scrolling down the page.
 
 ## How It Works
 
